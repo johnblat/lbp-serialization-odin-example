@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Reader",
+            "type": "cppvsdbg",
+            "preLaunchTask": "[Debug] Build Reader",
+            "program": "${workspaceFolder}/build/reader.exe",
+            "request": "launch",
+            "cwd":"${workspaceFolder}",
+            "symbolSearchPath": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug Writer",
+            "type": "cppvsdbg",
+            "preLaunchTask": "[Debug] Build Writer",
+            "program": "${workspaceFolder}/build/writer.exe",
+            "request": "launch",
+            "cwd":"${workspaceFolder}",
+            "symbolSearchPath": "${workspaceFolder}"
+        }
+    ]
+}
