@@ -6,7 +6,7 @@ import ser "../serializer"
 
 main :: proc() {
 
-    foo: ser.Foo
+    collection: ser.Collection
 
     // this program is short lived, but data should
     // probably be either a scratch buffer (it hangs around but is always used for this purpose)
@@ -18,12 +18,12 @@ main :: proc() {
         serializer_reader: ser.Serializer
         ser.serializer_init_reader(&serializer_reader, data[:])
 
-        ok := ser.serialize(&serializer_reader, &foo)
+        ok := ser.serialize(&serializer_reader, &collection)
         if !ok {
             fmt.printfln("serialize read failed")
         }
 
         fmt.printfln("version: %d (%v) -> %d (%v)", serializer_reader.version, serializer_reader.version, ser.SERIALIZER_VERSION_LATEST, ser.SERIALIZER_VERSION_LATEST)
     }
-    fmt.printfln("%v", foo)
+    fmt.printfln("%v", collection)
 }

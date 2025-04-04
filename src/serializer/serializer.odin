@@ -37,6 +37,7 @@ Serializer_Version :: enum u32le {
     add_foo_zeta = 4,
     rem_foo_epsilon = 5,
     mod_foo_zeta_f32_to_array = 6,
+    add_bar_and_move_foo_into_collection = 7,
     // Don't remove this!
     LATEST_PLUS_ONE,
 }
@@ -406,6 +407,8 @@ when SERIALIZER_ENABLE_GENERIC {
 
         // Add your custom serialization procedures here
         serialize_foo,
+        serialize_bar,
+        serialize_collection,
     }
 }
 
@@ -416,6 +419,71 @@ Foo :: struct {
     delta: f32,
     gamma: f32,
     zeta: [16]f32,
+}
+
+Bar :: struct {
+    kappa: i32,
+    mu: i32,
+}
+
+Collection :: struct {
+    foo: Foo,
+    bar: Bar,
+}
+
+serialize_collection :: proc(s: ^Serializer, collection: ^Collection, loc := #caller_location) -> bool {
+    if s.is_writing {
+        s.version = SERIALIZER_VERSION_LATEST
+    }
+
+    serialize(s, &s.version, loc) or_return
+
+    if !s.is_writing && s.version > SERIALIZER_VERSION_LATEST {
+        fmt.printf("Unsupported version: %d\n", s.version);
+        return false;
+    }
+
+    if s.version >= .add_bar_and_move_foo_into_collection {
+        serialize(s, &collection.foo, loc) or_return
+        serialize(s, &collection.bar, loc) or_return
+    } else {
+        // need to set back to 0 because Foo will read the version again
+        s.read_offset = 0
+        foo: Foo
+        serialize(s, &foo, loc) or_return
+
+        default_bar := Bar {300, 301}
+
+        collection.foo = foo
+        collection.bar = default_bar
+
+        // can return now because collection never existed yet
+        return true
+    }
+
+
+    return true
+}
+
+serialize_bar :: proc(s: ^Serializer, bar: ^Bar, loc := #caller_location) -> bool{
+    if s.is_writing {
+        s.version = SERIALIZER_VERSION_LATEST
+    }
+
+    serialize(s, &s.version, loc) or_return
+
+    if !s.is_writing && s.version > SERIALIZER_VERSION_LATEST {
+        fmt.printf("Unsupported version: %d\n", s.version);
+        return false;
+    }
+
+    if s.version >= .add_bar_and_move_foo_into_collection {
+        // these were the initial fields
+        serialize(s, &bar.kappa, loc) or_return
+        serialize(s, &bar.mu, loc) or_return
+    }
+
+    return true
 }
 
 serialize_foo :: proc(s: ^Serializer, foo: ^Foo, loc := #caller_location) -> bool {
@@ -447,7 +515,9 @@ serialize_foo :: proc(s: ^Serializer, foo: ^Foo, loc := #caller_location) -> boo
     //     foo.epsilon = default_epsilon_for_some_reason
     // }
 
-    if s.version <= .rem_foo_epsilon {
+    // need to account for versions that existed before the addition of the field too
+    // so we must check the range of versions where this field was present
+    if s.version >= .add_foo_epsilon &&  s.version < .rem_foo_epsilon {
         epsilon : f32
         serialize(s, &epsilon, loc) or_return
         foo.delta += epsilon
@@ -469,10 +539,15 @@ serialize_foo :: proc(s: ^Serializer, foo: ^Foo, loc := #caller_location) -> boo
 
     if s.version >= .mod_foo_zeta_f32_to_array {
         serialize(s, &foo.zeta, loc) or_return
-    } else {
+    } else if s.version >= .add_foo_zeta {
+        // it was after zeta was present, and before the modification
         zeta_single_value: f32
         serialize(s, &zeta_single_value) or_return
         foo.zeta[0] = zeta_single_value
+    } else {
+        // this was before the zeta field was ever added to begin with
+        default_zeta_for_some_reason := [16]f32{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
+        foo.zeta = default_zeta_for_some_reason
     }
 
 
