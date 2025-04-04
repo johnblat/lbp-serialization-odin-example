@@ -23,8 +23,6 @@ import sa "core:container/small_array"
 
 _ :: fmt // fmt is used only for debug printing
 
-
-
 SERIALIZER_ENABLE_GENERIC :: #config(SERIALIZER_ENABLE_GENERIC, true)
 
 // Each update to the data layout should be a value in this enum.
