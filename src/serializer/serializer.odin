@@ -525,6 +525,7 @@ serialize_foo :: proc(s: ^Serializer, foo: ^Foo, loc := #caller_location) -> boo
     if s.version >= .add_foo_epsilon &&  s.version < .rem_foo_epsilon {
         epsilon : f32
         serialize(s, &epsilon, loc) or_return
+        // demonstrating a situation where another field would be modified based on some value of an older (now removed) field
         foo.delta += epsilon
     }
 
