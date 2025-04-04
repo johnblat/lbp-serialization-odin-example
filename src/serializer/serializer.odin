@@ -59,7 +59,6 @@ when ODIN_DEBUG {
     Serializer_Debug :: struct {}
 }
 
-// TODO: serialize with version
 serializer_init_writer :: proc(
     s: ^Serializer,
     capacity: int = 1024,
