@@ -1,0 +1,10 @@
+Using https://github.com/jakubtomsu/odin-lbp-serialization/blob/main/serializer.odin, I created an example and made some modifications to support the latest odin compiler
+
+Using the `reader` and `writer` programs and custom serialization code, I was able to demo the following things:
+- adding fields to a struct
+- removing fields from a struct
+- converting field types
+- moving a saved struct to a container struct
+  - Foo moves to Collection.Foo
+  - This is cool cause it shows how a rearraging structs might be versioned
+ - Attempting to read from a "future version" in an "older version" of the reader app gets an error
