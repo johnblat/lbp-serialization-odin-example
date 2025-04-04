@@ -31,7 +31,12 @@ SERIALIZER_ENABLE_GENERIC :: #config(SERIALIZER_ENABLE_GENERIC, true)
 // WARNING: do not change the order of these!
 Serializer_Version :: enum u32le {
     initial = 0,
-
+    add_foo_delta = 1,
+    add_foo_epsilon = 2,
+    add_foo_gamma = 3,
+    add_foo_zeta = 4,
+    rem_foo_epsilon = 5,
+    mod_foo_zeta_f32_to_array = 6,
     // Don't remove this!
     LATEST_PLUS_ONE,
 }
@@ -269,6 +274,11 @@ serialize_number :: proc(
         }
         // odinfmt: enable
     }
+
+    if !s.is_writing {
+        serializer_debug_scope(s, fmt.tprint(typeid_of(T), "=", data^))
+    }
+
     return false
 }
 
@@ -402,20 +412,69 @@ when SERIALIZER_ENABLE_GENERIC {
 Foo :: struct {
     alpha: f32,
     beta: f32,
-    charlie: f32,
+    chi: f32,
+    delta: f32,
+    gamma: f32,
+    zeta: [16]f32,
 }
 
 serialize_foo :: proc(s: ^Serializer, foo: ^Foo, loc := #caller_location) -> bool {
     if s.is_writing {
         s.version = SERIALIZER_VERSION_LATEST
     }
+
+    serialize(s, &s.version, loc) or_return
+
     if !s.is_writing && s.version > SERIALIZER_VERSION_LATEST {
         fmt.printf("Unsupported version: %d\n", s.version);
         return false;
     }
-    serialize(s, &s.version, loc) or_return
+
     serialize(s, &foo.alpha, loc) or_return
     serialize(s, &foo.beta, loc) or_return
-    serialize(s, &foo.charlie, loc) or_return
+    serialize(s, &foo.chi, loc) or_return
+    if s.version >= .add_foo_delta {
+        serialize(s, &foo.delta, loc) or_return
+    } else {
+        default_delta_for_some_reason : f32 = 100
+        foo.delta = default_delta_for_some_reason
+    }
+
+    // if s.version >= .add_foo_epsilon {
+    //     serialize(s, &foo.epsilon, loc) or_return
+    // } else {
+    //     default_epsilon_for_some_reason : f32 = 200
+    //     foo.epsilon = default_epsilon_for_some_reason
+    // }
+
+    if s.version <= .rem_foo_epsilon {
+        epsilon : f32
+        serialize(s, &epsilon, loc) or_return
+        foo.delta += epsilon
+    }
+
+    if s.version >= .add_foo_gamma {
+        serialize(s, &foo.gamma, loc) or_return
+    } else {
+        default_gamma_for_some_reason : f32 = 300
+        foo.gamma = default_gamma_for_some_reason
+    }
+
+    // if s.version >= .add_foo_zeta {
+    //     serialize(s, &foo.zeta, loc) or_return
+    // } else {
+    //     default_zeta_for_some_reason : f32 = 400
+    //     foo.zeta = default_zeta_for_some_reason
+    // }
+
+    if s.version >= .mod_foo_zeta_f32_to_array {
+        serialize(s, &foo.zeta, loc) or_return
+    } else {
+        zeta_single_value: f32
+        serialize(s, &zeta_single_value) or_return
+        foo.zeta[0] = zeta_single_value
+    }
+
+
     return true
 }

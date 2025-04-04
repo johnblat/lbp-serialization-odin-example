@@ -16,13 +16,14 @@ main :: proc() {
         fmt.printfln("%v", os_err)
     } else {
         serializer_reader: ser.Serializer
-
         ser.serializer_init_reader(&serializer_reader, data[:])
+
         ok := ser.serialize(&serializer_reader, &foo)
         if !ok {
             fmt.printfln("serialize read failed")
         }
-    }
 
+        fmt.printfln("version: %d (%v) -> %d (%v)", serializer_reader.version, serializer_reader.version, ser.SERIALIZER_VERSION_LATEST, ser.SERIALIZER_VERSION_LATEST)
+    }
     fmt.printfln("%v", foo)
 }
