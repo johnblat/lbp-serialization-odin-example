@@ -8,3 +8,5 @@ Using the `reader` and `writer` programs and custom serialization code, I was ab
   - Foo moves to Collection.Foo
   - This is cool cause it shows how a rearraging structs might be versioned
  - Attempting to read from a "future version" in an "older version" of the reader app gets an error
+
+You can look at the commit history of the `src/serializer/serializer.odin` file to see a brief example of things changing over time.
