@@ -1,6 +1,6 @@
 Using https://github.com/jakubtomsu/odin-lbp-serialization/blob/main/serializer.odin, I created an example and made some modifications to support the latest odin compiler
 
-Using the `reader` and `writer` programs and custom serialization code, I was able to demo the following things:
+Using the `src/reader` and `src/writer` programs included in this repo, and custom serialization code in `src/serializer/serializer.odin`, I was able to demo the following things:
 - adding fields to a struct
 - removing fields from a struct
 - converting field types
