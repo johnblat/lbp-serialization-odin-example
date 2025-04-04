@@ -402,7 +402,7 @@ when SERIALIZER_ENABLE_GENERIC {
         serialize_dynamic_array,
         serialize_map,
 
-        // Everything below this comment is for example purposes. 
+        // Everything below this comment is for example purposes.
         // The above code can be copied and used within your own project
         // The below code demonstrates how versioning logic would work
         serialize_foo,
@@ -446,6 +446,11 @@ serialize_collection :: proc(s: ^Serializer, collection: ^Collection, loc := #ca
         serialize(s, &collection.foo, loc) or_return
         serialize(s, &collection.bar, loc) or_return
     } else {
+        // Collection did not exist yet.
+        // The data file will just contain a `Foo`
+        // as that was what was originally being saved to the file before
+        // `Collection` was added with `Foo` as its field`
+
         // need to set back to 0 because Foo will read the version again
         s.read_offset = 0
         foo: Foo
@@ -477,7 +482,7 @@ serialize_bar :: proc(s: ^Serializer, bar: ^Bar, loc := #caller_location) -> boo
     }
 
     if s.version >= .add_bar_and_move_foo_into_collection {
-        // these were the initial fields
+        // these are the initial fields in the first version that collection is created
         serialize(s, &bar.kappa, loc) or_return
         serialize(s, &bar.mu, loc) or_return
     }
@@ -507,6 +512,7 @@ serialize_foo :: proc(s: ^Serializer, foo: ^Foo, loc := #caller_location) -> boo
         foo.delta = default_delta_for_some_reason
     }
 
+    // OLD
     // if s.version >= .add_foo_epsilon {
     //     serialize(s, &foo.epsilon, loc) or_return
     // } else {
@@ -529,6 +535,7 @@ serialize_foo :: proc(s: ^Serializer, foo: ^Foo, loc := #caller_location) -> boo
         foo.gamma = default_gamma_for_some_reason
     }
 
+    // OLD
     // if s.version >= .add_foo_zeta {
     //     serialize(s, &foo.zeta, loc) or_return
     // } else {
@@ -539,12 +546,12 @@ serialize_foo :: proc(s: ^Serializer, foo: ^Foo, loc := #caller_location) -> boo
     if s.version >= .mod_foo_zeta_f32_to_array {
         serialize(s, &foo.zeta, loc) or_return
     } else if s.version >= .add_foo_zeta {
-        // it was after zeta was present, and before the modification
+        // this is a version after zeta was added, but before the type change modification
         zeta_single_value: f32
         serialize(s, &zeta_single_value) or_return
         foo.zeta[0] = zeta_single_value
     } else {
-        // this was before the zeta field was ever added to begin with
+        // this version was before the zeta field was ever added to begin with
         default_zeta_for_some_reason := [16]f32{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0}
         foo.zeta = default_zeta_for_some_reason
     }
