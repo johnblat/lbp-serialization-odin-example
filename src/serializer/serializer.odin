@@ -403,7 +403,9 @@ when SERIALIZER_ENABLE_GENERIC {
         serialize_dynamic_array,
         serialize_map,
 
-        // Add your custom serialization procedures here
+        // Everything below this comment is for example purposes. 
+        // The above code can be copied and used within your own project
+        // The below code demonstrates how versioning logic would work
         serialize_foo,
         serialize_bar,
         serialize_collection,
